@@ -1,0 +1,82 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  qa:
+    name: "Quality Assurance [PHP ${{ matrix.php }}]"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php:
+          - "7.4"
+          - "8.0"
+          - "8.1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Docs: https://github.com/shivammathur/setup-php
+      - name: Setup PHP
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "${{ matrix.php }}"
+
+      # https://github.com/ramsey/composer-install
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          composer-options: "--ignore-platform-reqs --optimize-autoloader"
+
+      - name: PHP CS Fixer
+        run: "vendor/bin/php-cs-fixer fix --dry-run --diff"
+
+      - name: PHPStan
+        run: "vendor/bin/phpstan analyse"
+
+  tests:
+    name: "Tests [PHP ${{ matrix.php }} - ${{ matrix.dependencies }}]"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php:
+          - "7.4"
+          - "8.0"
+          - "8.1"
+        dependencies:
+          - highest
+        include:
+          - php: 7.4
+            dependencies: 'lowest'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # https://github.com/shivammathur/setup-php
+      - name: Setup PHP
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "${{ matrix.php }}"
+          tools: phpunit-bridge
+          extensions: mbstring
+          coverage: xdebug
+
+      # https://github.com/ramsey/composer-install
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: "${{ matrix.dependencies }}"
+          composer-options: "--ignore-platform-reqs --optimize-autoloader"
+
+      - name: Run tests
+        run: vendor/bin/phpunit --coverage-text
