@@ -17,13 +17,9 @@
         </testsuite>
     </testsuites>
 
-    <coverage>
+    <coverage processUncoveredFiles="true">
         <include>
-            <directory>./</directory>
+            <directory suffix=".php">src</directory>
         </include>
-        <exclude>
-            <directory>./tests</directory>
-            <directory>./vendor</directory>
-        </exclude>
     </coverage>
 </phpunit>
