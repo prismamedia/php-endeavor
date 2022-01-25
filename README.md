@@ -172,7 +172,7 @@ use PrismaMedia\Endeavor\Strategy\LinearStrategy;
 $endeavor = new Endeavor(new LinearStrategy(500));
 $endeavor->setErrorHandler(function (Endeavor $endeavor, \Throwable $e, int $attempt) {
     // $endeavor is the current instance
-    // $e is the throw Exception during this attempt
+    // $e is the thrown Exception during this attempt
     // $attempt is the current attempt number
     $this->logger->error(
         'Something went wrong on the attempt #{attempt}: {error}',
@@ -217,4 +217,4 @@ Please make sure to update tests as appropriate.
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+[BSD 3-Clause](https://choosealicense.com/licenses/bsd-3-clause/)
