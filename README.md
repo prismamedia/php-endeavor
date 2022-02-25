@@ -208,6 +208,39 @@ $endeavor->setErrorHandler(function (Endeavor $endeavor, \Throwable $e, int $att
 ```
 
 
+## Testing
+
+Testing a class which uses Endeavor can dramatically slow down the execution of tests.
+
+### Symfony context
+
+On a Symfony project, this can be resolved using the [`symfony/phpunit-bridge`](https://github.com/symfony/phpunit-bridge) package and the included [`ClockMock`](https://github.com/symfony/phpunit-bridge/blob/5.3/ClockMock.php).
+
+_See [the documentation](https://symfony.com/doc/current/components/phpunit_bridge.html#clock-mocking) on how to setup the bridge and use the `@group time-sensitive` annotation._
+
+Finally, on the `tests/bootstrap.php` ([_documentation_](https://symfony.com/doc/current/testing/bootstrap.html)), register the `Endeavor` class:
+
+```php
+# tests/boostrap.php
+<?php
+
+use PrismaMedia\Endeavor\Endeavor;
+use Symfony\Bridge\PhpUnit\ClockMock;
+use Symfony\Component\Dotenv\Dotenv;
+
+require dirname(__DIR__).'/vendor/autoload.php';
+
+if (file_exists(dirname(__DIR__).'/config/bootstrap.php')) {
+    require dirname(__DIR__).'/config/bootstrap.php';
+} elseif (method_exists(Dotenv::class, 'bootEnv')) {
+    (new Dotenv())->bootEnv(dirname(__DIR__).'/.env');
+}
+
+// Register Endeavor in ClockMock to skip the waiting time between retries
+ClockMock::register(Endeavor::class);
+```
+
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
